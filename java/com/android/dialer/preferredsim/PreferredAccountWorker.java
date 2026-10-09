@@ -87,6 +87,13 @@ public interface PreferredAccountWorker {
   SelectPhoneAccountDialogOptions getVoicemailDialogOptions();
 
   /**
+   * @return a {@link SelectPhoneAccountDialogOptions} for a dialog where the user picks the account
+   *     for one call among {@code candidates}, without the option to remember the choice
+   */
+  SelectPhoneAccountDialogOptions getChooseAccountDialogOptions(
+      List<PhoneAccountHandle> candidates);
+
+  /**
    * Return {@link Result} for the best {@link PhoneAccountHandle} among {@code candidates} to call
    * the number with. If none are eligible, a {@link SelectPhoneAccountDialogOptions} will be
    * provided to show a dialog for the user to manually select.

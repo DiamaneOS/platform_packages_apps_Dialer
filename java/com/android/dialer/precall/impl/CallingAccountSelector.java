@@ -70,7 +70,7 @@ public class CallingAccountSelector implements PreCallAction {
       return false;
     }
 
-    if (builder.getPhoneAccountHandle() != null) {
+    if (builder.getPhoneAccountHandle() != null && !builder.shouldChooseAccount()) {
       return false;
     }
     if (PhoneNumberUtils.isEmergencyNumber(builder.getUri().getSchemeSpecificPart())) {
@@ -108,7 +108,23 @@ public class CallingAccountSelector implements PreCallAction {
         Logger.get(coordinator.getActivity()).logImpression(Type.DUAL_SIM_SELECTION_VOICEMAIL);
         break;
       case PhoneAccount.SCHEME_TEL:
-        processPreferredAccount(coordinator);
+        if (builder.shouldChooseAccount()) {
+          // The user asked to pick the account: skip preferred, default and suggested accounts.
+          builder.setPhoneAccountHandle(null);
+          showDialog(
+              coordinator,
+              coordinator.startPendingAction(),
+              preferredAccountWorker.getChooseAccountDialogOptions(
+                  coordinator
+                      .getActivity()
+                      .getSystemService(TelecomManager.class)
+                      .getCallCapablePhoneAccounts()),
+              null,
+              null,
+              null);
+        } else {
+          processPreferredAccount(coordinator);
+        }
         break;
       default:
         // might be PhoneAccount.SCHEME_SIP

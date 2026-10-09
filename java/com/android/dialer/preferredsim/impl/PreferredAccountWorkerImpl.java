@@ -95,6 +95,13 @@ public class PreferredAccountWorkerImpl implements PreferredAccountWorker {
   }
 
   @Override
+  public SelectPhoneAccountDialogOptions getChooseAccountDialogOptions(
+      List<PhoneAccountHandle> candidates) {
+    // No data ID, so the dialog offers no "remember this choice" checkbox.
+    return createDialogOptionsBuilder(candidates, null, null).build();
+  }
+
+  @Override
   public ListenableFuture<Result> selectAccount(
       String phoneNumber, List<PhoneAccountHandle> candidates) {
     return backgroundExecutor.submit(() -> doInBackground(phoneNumber, candidates));
