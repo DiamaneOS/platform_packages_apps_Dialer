@@ -46,6 +46,7 @@ public class CallIntentBuilder implements Parcelable {
   private boolean isDuoCall;
   private String callSubject;
   private boolean allowAssistedDial;
+  private boolean chooseAccount;
 
   private final Bundle inCallUiIntentExtras = new Bundle();
   private final Bundle placeCallExtras = new Bundle();
@@ -113,6 +114,7 @@ public class CallIntentBuilder implements Parcelable {
     callSubject = parcel.readString();
     allowAssistedDial = parcel.readInt() != 0;
     inCallUiIntentExtras.putAll(parcel.readBundle(classLoader));
+    chooseAccount = parcel.readInt() != 0;
   }
 
   public static CallIntentBuilder forVoicemail(
@@ -170,6 +172,20 @@ public class CallIntentBuilder implements Parcelable {
 
   public boolean isAssistedDialAllowed() {
     return allowAssistedDial;
+  }
+
+  /**
+   * Default false. If true, the user picks the phone account for this call even when a default or
+   * preferred account exists. Ignored with fewer than two call-capable accounts and for emergency
+   * numbers.
+   */
+  public CallIntentBuilder setChooseAccount(boolean chooseAccount) {
+    this.chooseAccount = chooseAccount;
+    return this;
+  }
+
+  public boolean shouldChooseAccount() {
+    return chooseAccount;
   }
 
   public CallIntentBuilder setCallSubject(String callSubject) {
@@ -281,6 +297,7 @@ public class CallIntentBuilder implements Parcelable {
     dest.writeString(callSubject);
     dest.writeInt(allowAssistedDial ? 1 : 0);
     dest.writeBundle(inCallUiIntentExtras);
+    dest.writeInt(chooseAccount ? 1 : 0);
   }
 
   public static final Creator<CallIntentBuilder> CREATOR =

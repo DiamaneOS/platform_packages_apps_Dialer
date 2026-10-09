@@ -62,6 +62,7 @@ import com.android.dialer.blocking.FilteredNumbersUtil;
 import com.android.dialer.callcomposer.CallComposerActivity;
 import com.android.dialer.calldetails.CallDetailsEntries;
 import com.android.dialer.calldetails.OldCallDetailsActivity;
+import com.android.dialer.callintent.CallInitiationType;
 import com.android.dialer.callintent.CallIntentBuilder;
 import com.android.dialer.calllogutils.CallbackActionHelper.CallbackAction;
 import com.android.dialer.clipboard.ClipboardUtils;
@@ -89,6 +90,7 @@ import com.android.dialer.phonenumbercache.CachedNumberLookupService;
 import com.android.dialer.phonenumbercache.ContactInfo;
 import com.android.dialer.phonenumbercache.PhoneNumberCache;
 import com.android.dialer.phonenumberutil.PhoneNumberHelper;
+import com.android.dialer.precall.PreCall;
 import com.android.dialer.telecom.TelecomUtil;
 import com.android.dialer.util.CallUtil;
 import com.android.dialer.util.DialerUtils;
@@ -512,6 +514,9 @@ public final class CallLogListItemViewHolder extends RecyclerView.ViewHolder
     // Calling expandTemplate with a null parameter will cause a NullPointerException.
     CharSequence validNameOrNumber = nameOrNumber == null ? "" : nameOrNumber;
 
+    // Only a plain voice call back offers the SIM choice; set below.
+    setChooseAccountOnLongPress(false);
+
     if (!TextUtils.isEmpty(voicemailUri)) {
       // Treat as voicemail list item; show play button if not expanded.
       if (!isExpanded) {
@@ -570,6 +575,9 @@ public final class CallLogListItemViewHolder extends RecyclerView.ViewHolder
         } else {
           primaryActionButtonView.setTag(
               IntentProvider.getReturnCallIntentProvider(number + postDialDigits));
+        }
+        if (!callLogCache.isVoicemailNumber(accountHandle, number)) {
+          setChooseAccountOnLongPress(PreCall.canChooseAccount(context, number));
         }
 
         primaryActionButtonView.setContentDescription(
@@ -1071,6 +1079,35 @@ public final class CallLogListItemViewHolder extends RecyclerView.ViewHolder
 
       DialerUtils.startActivityWithErrorToast(context, intent);
     }
+  }
+
+  /**
+   * With two or more SIMs, a long press on the call button lets the user choose the SIM for this
+   * call. Otherwise the button is not long-clickable, as in stock, so the row's context menu is not
+   * reached through it.
+   */
+  private void setChooseAccountOnLongPress(boolean enabled) {
+    if (enabled) {
+      primaryActionButtonView.setOnLongClickListener(this::onPrimaryActionButtonLongClick);
+    } else {
+      primaryActionButtonView.setOnLongClickListener(null);
+      primaryActionButtonView.setLongClickable(false);
+    }
+  }
+
+  private boolean onPrimaryActionButtonLongClick(View view) {
+    if (!PreCall.canChooseAccount(context, number)) {
+      // SIMs changed since the row was bound; do nothing, as stock would.
+      setChooseAccountOnLongPress(false);
+      return true;
+    }
+    CallLogAsyncTaskUtil.markCallAsRead(context, callIds);
+    PreCall.start(
+        context,
+        new CallIntentBuilder(number + postDialDigits, CallInitiationType.Type.CALL_LOG)
+            .setAllowAssistedDial(canSupportAssistedDialing())
+            .setChooseAccount(true));
+    return true;
   }
 
   private static boolean isNonContactEntry(ContactInfo info) {

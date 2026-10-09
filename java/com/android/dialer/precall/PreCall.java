@@ -20,7 +20,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
+import android.telephony.PhoneNumberUtils;
+import android.text.TextUtils;
 import com.android.dialer.callintent.CallIntentBuilder;
+import com.android.dialer.phonenumberutil.PhoneNumberHelper;
+import com.android.dialer.telecom.TelecomUtil;
 import com.android.dialer.util.DialerUtils;
 
 /** Interface to prepare a {@link CallIntentBuilder} before placing the call with telecom. */
@@ -41,5 +45,19 @@ public interface PreCall {
 
   static void start(Context context, CallIntentBuilder builder) {
     DialerUtils.startActivityWithErrorToast(context, getIntent(context, builder));
+  }
+
+  /**
+   * Whether a long press on a call action may offer the account chooser for {@code number}: there
+   * are at least two call-capable accounts and the number is a phone number (not SIP) and not an
+   * emergency number. Emergency numbers are left to the platform to route.
+   */
+  static boolean canChooseAccount(Context context, String number) {
+    if (TextUtils.isEmpty(number)
+        || PhoneNumberHelper.isUriNumber(number)
+        || PhoneNumberUtils.isEmergencyNumber(number)) {
+      return false;
+    }
+    return TelecomUtil.getCallCapablePhoneAccounts(context).size() > 1;
   }
 }

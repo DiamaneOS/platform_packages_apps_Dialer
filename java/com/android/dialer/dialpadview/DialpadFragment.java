@@ -452,6 +452,7 @@ public class DialpadFragment extends Fragment
 
     floatingActionButton = fragmentView.findViewById(R.id.dialpad_floating_action_button);
     floatingActionButton.setOnClickListener(this);
+    floatingActionButton.setOnLongClickListener(this);
     floatingActionButtonController =
         new FloatingActionButtonController(getActivity(), floatingActionButton);
     Trace.endSection();
@@ -1115,8 +1116,35 @@ public class DialpadFragment extends Fragment
     } else if (id == R.id.digits) {
       this.digits.setCursorVisible(true);
       return false;
+    } else if (id == R.id.dialpad_floating_action_button) {
+      return handleDialButtonLongPressed();
     }
     return false;
+  }
+
+  /**
+   * With two or more SIMs, a long press on the dial button lets the user choose the SIM for this
+   * call. Otherwise, and for an empty dial pad, prohibited or emergency numbers, it does nothing.
+   *
+   * @return whether the long press was handled
+   */
+  private boolean handleDialButtonLongPressed() {
+    if (isDigitsEmpty()) {
+      return false;
+    }
+    final String number = digits.getText().toString();
+    if (!TextUtils.isEmpty(prohibitedPhoneNumberRegexp)
+        && number.matches(prohibitedPhoneNumberRegexp)) {
+      return false;
+    }
+    if (!PreCall.canChooseAccount(getContext(), number)) {
+      return false;
+    }
+    PreCall.start(
+        getContext(),
+        new CallIntentBuilder(number, CallInitiationType.Type.DIALPAD).setChooseAccount(true));
+    hideAndClearDialpad();
+    return true;
   }
 
   /**
