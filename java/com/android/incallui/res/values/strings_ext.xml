@@ -33,7 +33,7 @@
     <string name="recording_warning_title">Enable call recording?</string>
     <string name="recording_warning_text">Warning:
     You are fully responsible for compliance with any laws, regulations and rules that apply to the use of call recording functionality and the use or distribution of those recordings.
-    By continuing to use call recording, you acknowledge that you fully read this and GrapheneOS will not be held liable in any way for any possible consequences should there be any
+    By continuing to use call recording, you acknowledge that you fully read this and DiamaneOS will not be held liable in any way for any possible consequences should there be any
     due to your usage of the call recording feature.
     </string>
 </resources>
