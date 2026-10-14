@@ -2,6 +2,4 @@
   <string name="build_version_label">Järguversioon</string>
   <string name="open_source_license_detail_label">Avatud lähtekoodiga tarkvara litsentsi üksikasjad</string>
   <string name="licenseActivityLabel">Avatud lähtekoodi litsentsid</string>
-  <string name="privacy_policy_label">Privaatsuseeskirjad</string>
-  <string name="terms_of_service_label">Teenusetingimused</string>
 </resources>
