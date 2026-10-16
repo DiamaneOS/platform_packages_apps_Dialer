@@ -514,7 +514,7 @@ public final class CallLogListItemViewHolder extends RecyclerView.ViewHolder
     // Calling expandTemplate with a null parameter will cause a NullPointerException.
     CharSequence validNameOrNumber = nameOrNumber == null ? "" : nameOrNumber;
 
-    // Only a plain voice call back offers the SIM choice; set below.
+    // Only a plain voice call back offers the SIM choice. Set below.
     setChooseAccountOnLongPress(false);
 
     if (!TextUtils.isEmpty(voicemailUri)) {
@@ -1097,7 +1097,7 @@ public final class CallLogListItemViewHolder extends RecyclerView.ViewHolder
 
   private boolean onPrimaryActionButtonLongClick(View view) {
     if (!PreCall.canChooseAccount(context, number)) {
-      // SIMs changed since the row was bound; do nothing, as stock would.
+      // SIMs changed since the row was bound. Do nothing, as stock would.
       setChooseAccountOnLongPress(false);
       return true;
     }
